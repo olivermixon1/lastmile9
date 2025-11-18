@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shipper - Create Delivery Job</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+    .container {
+        max-width: 600px; margin: auto; background: white;
+        padding: 25px; border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; color: #333; margin-bottom: 20px; }
+    label { font-weight: bold; margin-top: 12px; display: block; }
+    input, textarea, select {
+        width: 100%; padding: 10px; margin-top: 5px;
+        border: 1px solid #ccc; border-radius: 5px; font-size: 15px;
+    }
+    button {
+        width: 100%; padding: 12px; margin-top: 20px;
+        background: #0066ff; color: white; border: none;
+        font-size: 18px; border-radius: 6px; cursor: pointer;
+    }
+    button:hover { background: #004cd1; }
+    .message {
+        margin-top: 15px; padding: 12px; border-radius: 5px; display: none;
+        font-size: 16px; font-weight: bold; text-align: center;
+    }
+    .success { background: #d2ffd2; color: #036603; }
+    .error { background: #ffd4d4; color: #990000; }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <h1>Create Delivery Job</h1>
+
+    <label>Pickup Location</label>
+    <input id="pickup" type="text" placeholder="Amazon SODO">
+
+    <label>Dropoff Location</label>
+    <input id="dropoff" type="text" placeholder="Bellevue Downtown">
+
+    <label>Load Description</label>
+    <textarea id="description" rows="3" placeholder="Pallet of electronics"></textarea>
+
+    <label>Weight</label>
+    <input id="weight" type="text" placeholder="2000 lbs">
+
+    <label>Equipment Type</label>
+    <select id="equipment">
+        <option value="">Select type</option>
+        <option value="Dry Van">Dry Van</option>
+        <option value="Reefer">Reefer</option>
+        <option value="Flatbed">Flatbed</option>
+        <option value="Box Truck">Box Truck</option>
+        <option value="Container">Container</option>
+    </select>
+
+    <label>Delivery Window</label>
+    <input id="delivery" type="datetime-local">
+
+    <label>Contact Phone</label>
+    <input id="phone" type="text" placeholder="+1 555 123 4567">
+
+    <label>Price Offered ($)</label>
+    <input id="price" type="number" step="0.01" placeholder="200.00">
+
+    <button onclick="createJob()">Submit Job</button>
+
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+async function createJob() {
+
+    const job = {
+        pickup_location: document.getElementById("pickup").value,
+        dropoff_location: document.getElementById("dropoff").value,
+        load_description: document.getElementById("description").value,
+        weight: document.getElementById("weight").value,
+        equipment_type: document.getElementById("equipment").value,
+        delivery_window: document.getElementById("delivery").value,
+        contact_phone: document.getElementById("phone").value,
+        price_offered: parseFloat(document.getElementById("price").value)
+    };
+
+    const messageBox = document.getElementById("message");
+
+    try {
+        const response = await fetch("/jobs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(job)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            messageBox.style.display = "block";
+            messageBox.className = "message success";
+            messageBox.innerText = "Job created successfully! ID: " + result.id;
+
+            document.querySelectorAll("input, textarea, select").forEach(el => el.value = "");
+        } else {
+            throw new Error(result.detail || "Failed to create job");
+        }
+    } catch (err) {
+        messageBox.style.display = "block";
+        messageBox.className = "message error";
+        messageBox.innerText = "Error: " + err.message;
+    }
+}
+</script>
+
+</body>
+</html>
