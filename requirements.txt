@@ -4,4 +4,3 @@ bcrypt
 pyjwt
 python-dotenv
 openai
-EOF
